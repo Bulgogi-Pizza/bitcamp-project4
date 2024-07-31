@@ -94,18 +94,24 @@ public class Board {
         int currentX = startX;
         int currentY = startY;
         for (int i = 1; i <= steps; i++) {
-            int newX = startX + (deltaX * i) / steps;
-            int newY = startY + (deltaY * i) / steps;
-            board[currentX][currentY] = '.';
-            board[newX][newY] = pieceType;
-            displayBoard();
-            try {
-                Thread.sleep(50); // 짧은 지연으로 애니메이션 효과
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            int rate = 50;
+            while (rate > 0) {
+                int newX = startX + (deltaX * i) / steps;
+                int newY = startY + (deltaY * i) / steps;
+                board[currentX][currentY] = '.';
+                board[newX][newY] = pieceType;
+                clearConsole();
+                displayBoard();
+                try {
+                    Thread.sleep(5); // 짧은 지연으로 애니메이션 효과
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                currentX = newX;
+                currentY = newY;
+
+                rate--;
             }
-            currentX = newX;
-            currentY = newY;
         }
 
         // 최종 이동 위치
