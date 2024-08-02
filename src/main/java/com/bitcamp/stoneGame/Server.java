@@ -10,11 +10,13 @@ import java.net.Socket;
 
 public class Server {
 
+  Print print = new Print();
   Player player1;
   Player player2;
-  Print print = new Print();
   ClientHandler clientHandler1;
   ClientHandler clientHandler2;
+  int turnPlayer;
+
 
   public Server() {
   }
@@ -38,9 +40,8 @@ public class Server {
       player1 = clientHandler1.getPlayer();
       player2 = clientHandler2.getPlayer();
 
-      print.printlnSystem("디버깅용, 실행 성공");
-
       turnGameStart();
+      startMainGameStart();
 
     } catch (Exception e) {
       System.out.println("클라이언트 연결 중 오류 발생");
@@ -61,14 +62,33 @@ public class Server {
         if (select1 - select2 == 1 || select1 - select2 == -2) {
           printAndSendMessage(strToSystemStyle(player1.getName() + " 승리"));
           printAndSendMessage(strToSystemStyle(player1.getName() + "가 선공으로 시작합니다."));
+          turnPlayer = 1;
           break;
         } else {
           printAndSendMessage(strToSystemStyle(player2.getName() + " 승리"));
           printAndSendMessage(strToSystemStyle(player2.getName() + "가 선공으로 시작합니다."));
+          turnPlayer = 2;
           break;
         }
       }
     }
+  }
+
+  public void startMainGameStart() throws IOException {
+    clientHandler1.out.writeUTF("StartMainGame");
+    clientHandler2.out.writeUTF("StartMainGame");
+
+    print.printfSystem("%s : %s", clientHandler1.getHostAddress(), clientHandler1.in.readUTF());
+    print.printfSystem("%s : %s", clientHandler2.getHostAddress(), clientHandler2.in.readUTF());
+
+    if (turnPlayer == 1) {
+      clientHandler1.out.writeUTF("PlayerTurn");
+      clientHandler2.out.writeUTF("WaitPlay");
+    } else {
+      clientHandler1.out.writeUTF("WaitPlay");
+      clientHandler2.out.writeUTF("PlayerTurn");
+    }
+
   }
 
   private void printAndSendMessage(String msg) throws IOException {

@@ -1,5 +1,6 @@
 package com.bitcamp.stoneGame;
 
+import com.bitcamp.GoBoardWithPhysics;
 import com.bitcamp.stoneGame.vo.Player;
 import com.bitcamp.util.ObjectInputStreamStoneGame;
 import com.bitcamp.util.ObjectOutputStreamStoneGame;
@@ -59,11 +60,8 @@ public class Client {
             case "StartTurnGame":
               startTurnGame();
               break;
-            case "PlayerTurn":
-              playTurn();
-              break;
-            case "WaitPlay":
-              waitTurn();
+            case "StartMainGame":
+              startMainGame();
               break;
           }
         } catch (Exception e) {
@@ -73,6 +71,25 @@ public class Client {
       }
     } catch (IOException e) {
       e.printStackTrace();
+    }
+  }
+
+  private void startMainGame() throws IOException {
+    out.writeUTF("MainGame Connected");
+
+    new GoBoardWithPhysics();
+
+    while (true) {
+      String command = in.readUTF();
+
+      switch (command) {
+        case "PlayerTurn":
+          playTurn();
+          break;
+        case "WaitPlay":
+          waitTurn();
+          break;
+      }
     }
   }
 

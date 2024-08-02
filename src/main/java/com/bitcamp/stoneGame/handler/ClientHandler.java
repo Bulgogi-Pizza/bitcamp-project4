@@ -6,6 +6,7 @@ import com.bitcamp.util.ObjectInputStreamStoneGame;
 import com.bitcamp.util.ObjectOutputStreamStoneGame;
 import com.bitcamp.util.Print;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.Socket;
 
 public class ClientHandler extends Thread {
@@ -13,6 +14,7 @@ public class ClientHandler extends Thread {
   public ObjectInputStreamStoneGame in;
   public ObjectOutputStreamStoneGame out;
   Print print = new Print();
+  InetAddress addr;
   private boolean turn;
   private Socket clientSocket;
   private ClientSocketListener socketListener;
@@ -22,6 +24,7 @@ public class ClientHandler extends Thread {
     this.out = new ObjectOutputStreamStoneGame(clientSocket.getOutputStream());
     this.in = new ObjectInputStreamStoneGame(clientSocket.getInputStream());
     this.socketListener = new ClientSocketListener(clientSocket, in, out);
+    this.addr = clientSocket.getLocalAddress();
 
     socketListener.onConnect();
   }
@@ -35,6 +38,14 @@ public class ClientHandler extends Thread {
       e.printStackTrace();
       return null;
     }
+  }
+
+  public String getHostName() {
+    return addr.getHostName();
+  }
+
+  public String getHostAddress() {
+    return addr.getHostAddress();
   }
 
   @Override
