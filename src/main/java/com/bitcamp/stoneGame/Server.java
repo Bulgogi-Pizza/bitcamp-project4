@@ -2,14 +2,18 @@ package com.bitcamp.stoneGame;
 
 import com.bitcamp.stoneGame.handler.ClientHandler;
 import com.bitcamp.stoneGame.vo.Player;
+import com.bitcamp.stoneGame.vo.Stone;
 import com.bitcamp.util.Ansi;
 import com.bitcamp.util.Print;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Server {
 
+  List<Stone> stoneList = new ArrayList<>();
   Print print = new Print();
   Player player1;
   Player player2;
@@ -78,7 +82,7 @@ public class Server {
     }
   }
 
-  public void startMainGameStart() throws IOException {
+  public void startMainGameStart() throws IOException, ClassNotFoundException {
     clientHandler1.out.writeUTF("StartMainGame");
     clientHandler2.out.writeUTF("StartMainGame");
 
@@ -94,8 +98,10 @@ public class Server {
         if (msg.equals("done")) {
           System.out.println("hi");
           clientHandler2.out.writeUTF("done");
+          clientHandler2.out.writeObject(clientHandler1.in.readObject());
           turnPlayer = 2;
         }
+
       } else {
         clientHandler1.out.writeUTF("WaitPlay");
         clientHandler2.out.writeUTF("PlayerTurn");
@@ -104,6 +110,7 @@ public class Server {
         if (msg.equals("done")) {
           System.out.println("hi");
           clientHandler1.out.writeUTF("done");
+          clientHandler1.out.writeObject(clientHandler2.in.readObject());
           turnPlayer = 1;
         }
       }

@@ -1,6 +1,7 @@
 package com.bitcamp.stoneGame;
 
 import com.bitcamp.stoneGame.vo.Player;
+import com.bitcamp.stoneGame.vo.Stone;
 import com.bitcamp.util.ObjectInputStreamStoneGame;
 import com.bitcamp.util.ObjectOutputStreamStoneGame;
 import com.bitcamp.util.Print;
@@ -9,12 +10,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Client {
 
   String serverAddress;
   int serverPort;
   Player player;
+  List<Stone> stoneList = new ArrayList<>();
 
   ObjectOutputStream out;
   ObjectInputStream in;
@@ -71,6 +75,7 @@ public class Client {
         } catch (Exception e) {
           System.out.println("오류 발생");
           e.printStackTrace();
+          break;
         }
       }
     } catch (IOException e) {
@@ -78,37 +83,40 @@ public class Client {
     }
   }
 
-  private void startMainGame() throws IOException, InterruptedException {
+  private void startMainGame() throws IOException, InterruptedException, ClassNotFoundException {
     out.writeUTF("MainGame Connected");
-
+    String command;
     goBoard = new GoBoardWithPhysics(player);
     boardPanel = goBoard.getBoardPanel();
 
     while (true) {
-      String command = in.readUTF();
+      if (in.available() > 0) {
+        command = in.readUTF();
 
-      switch (command) {
-        case "PlayerTurn":
-          playTurn();
-          break;
-        case "WaitPlay":
-          waitTurn();
-          break;
+        switch (command) {
+          case "PlayerTurn":
+            playTurn();
+            break;
+          case "WaitPlay":
+            waitTurn();
+            break;
+        }
       }
     }
   }
 
   private void playTurn() throws InterruptedException, IOException {
-    int turn = boardPanel.getTurn();
     player.setTurn(true);
     boardPanel.updatePlayer(player);
     System.out.println("턴 시작");
 
     while (true) {
-      System.out.println("hi 나 검사중");
-      if (turn != boardPanel.getTurn()) {
-        System.out.println("hi 나 검사끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝");
+      System.out.println("입력 대기 중");
+      if (boardPanel.isDone) {
+        boardPanel.isDone = false;
+        System.out.println("입력 완료");
         out.writeUTF("done");
+        out.writeObject(boardPanel.getAction());
         break;
       }
     }
@@ -117,13 +125,17 @@ public class Client {
 
   }
 
-  private void waitTurn() throws InterruptedException, IOException {
+  private void waitTurn() throws InterruptedException, IOException, ClassNotFoundException {
     player.setTurn(false);
     boardPanel.updatePlayer(player);
     System.out.println("대기 중");
+
     String msg = in.readUTF();
-    System.out.println(msg);
-    System.out.println("대기 완료");
+    if (msg.equals("done")) {
+      boardPanel.setStones((List<Stone>) in.readObject());
+      System.out.println(msg);
+      System.out.println("대기 완료");
+    }
   }
 
   private void startTurnGame() throws IOException {
