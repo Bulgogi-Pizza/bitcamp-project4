@@ -32,10 +32,14 @@ public class Server {
       Socket socket1 = serverSocket.accept();
       clientHandler1 = new ClientHandler(socket1);
       clientHandler1.start();
+      clientHandler1.out.writeUTF("SetPlayerNum");
+      clientHandler1.out.writeInt(1);
 
       Socket socket2 = serverSocket.accept();
       clientHandler2 = new ClientHandler(socket2);
       clientHandler2.start();
+      clientHandler2.out.writeUTF("SetPlayerNum");
+      clientHandler2.out.writeInt(2);
 
       player1 = clientHandler1.getPlayer();
       player2 = clientHandler2.getPlayer();
@@ -81,12 +85,28 @@ public class Server {
     print.printfSystem("%s : %s", clientHandler1.getHostAddress(), clientHandler1.in.readUTF());
     print.printfSystem("%s : %s", clientHandler2.getHostAddress(), clientHandler2.in.readUTF());
 
-    if (turnPlayer == 1) {
-      clientHandler1.out.writeUTF("PlayerTurn");
-      clientHandler2.out.writeUTF("WaitPlay");
-    } else {
-      clientHandler1.out.writeUTF("WaitPlay");
-      clientHandler2.out.writeUTF("PlayerTurn");
+    while (true) {
+      if (turnPlayer == 1) {
+        clientHandler1.out.writeUTF("PlayerTurn");
+        clientHandler2.out.writeUTF("WaitPlay");
+        String msg = clientHandler1.in.readUTF();
+        System.out.println(msg);
+        if (msg.equals("done")) {
+          System.out.println("hi");
+          clientHandler2.out.writeUTF("done");
+          turnPlayer = 2;
+        }
+      } else {
+        clientHandler1.out.writeUTF("WaitPlay");
+        clientHandler2.out.writeUTF("PlayerTurn");
+        String msg = clientHandler2.in.readUTF();
+        System.out.println(msg);
+        if (msg.equals("done")) {
+          System.out.println("hi");
+          clientHandler1.out.writeUTF("done");
+          turnPlayer = 1;
+        }
+      }
     }
 
   }

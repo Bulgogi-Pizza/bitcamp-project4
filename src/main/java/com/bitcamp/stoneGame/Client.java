@@ -21,6 +21,8 @@ public class Client {
 
   Print print = new Print();
   PromptStoneGame prompt = new PromptStoneGame();
+  GoBoardWithPhysics goBoard;
+  BoardPanel boardPanel;
 
   public Client() {
   }
@@ -50,6 +52,9 @@ public class Client {
           String command = in.readUTF();
 
           switch (command) {
+            case "SetPlayerNum":
+              player.setPlayerNum(in.readInt());
+              break;
             case "Connected":
               print.printlnSystem("서버에 연결되었습니다.");
               break;
@@ -73,10 +78,11 @@ public class Client {
     }
   }
 
-  private void startMainGame() throws IOException {
+  private void startMainGame() throws IOException, InterruptedException {
     out.writeUTF("MainGame Connected");
 
-    new GoBoardWithPhysics();
+    goBoard = new GoBoardWithPhysics(player);
+    boardPanel = goBoard.getBoardPanel();
 
     while (true) {
       String command = in.readUTF();
@@ -92,12 +98,32 @@ public class Client {
     }
   }
 
-  private void playTurn() {
+  private void playTurn() throws InterruptedException, IOException {
+    int turn = boardPanel.getTurn();
+    player.setTurn(true);
+    boardPanel.updatePlayer(player);
+    System.out.println("턴 시작");
+
+    while (true) {
+      System.out.println("hi 나 검사중");
+      if (turn != boardPanel.getTurn()) {
+        System.out.println("hi 나 검사끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝끝");
+        out.writeUTF("done");
+        break;
+      }
+    }
+
+    System.out.println("턴 종료");
 
   }
 
-  private void waitTurn() {
-
+  private void waitTurn() throws InterruptedException, IOException {
+    player.setTurn(false);
+    boardPanel.updatePlayer(player);
+    System.out.println("대기 중");
+    String msg = in.readUTF();
+    System.out.println(msg);
+    System.out.println("대기 완료");
   }
 
   private void startTurnGame() throws IOException {
