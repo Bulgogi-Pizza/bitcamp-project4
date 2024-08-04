@@ -1,5 +1,7 @@
 package com.bitcamp.stoneGame;
 
+import com.bitcamp.stoneGame.main.GoBoardWithPhysics;
+import com.bitcamp.stoneGame.ui.BoardPanel;
 import com.bitcamp.stoneGame.vo.Player;
 import com.bitcamp.stoneGame.vo.Stone;
 import com.bitcamp.util.ObjectInputStreamStoneGame;

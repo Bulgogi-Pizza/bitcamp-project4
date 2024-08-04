@@ -1,15 +1,14 @@
-package com.bitcamp.stoneGame;
+package com.bitcamp.stoneGame.main;
 
+import com.bitcamp.stoneGame.ui.BoardPanel;
 import com.bitcamp.stoneGame.vo.Player;
 import javax.swing.JFrame;
 
 public class GoBoardWithPhysics extends JFrame {
 
-  BoardPanel boardPanel;
-  private Player player;
+  private BoardPanel boardPanel;
 
   public GoBoardWithPhysics(Player player) {
-    this.player = player;
     this.boardPanel = new BoardPanel(player);
     setTitle("Go Board with Physics");
     setSize(850, 880);
@@ -21,6 +20,4 @@ public class GoBoardWithPhysics extends JFrame {
   public BoardPanel getBoardPanel() {
     return boardPanel;
   }
-
-
 }
