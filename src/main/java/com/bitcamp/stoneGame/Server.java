@@ -37,13 +37,17 @@ public class Server {
       clientHandler1 = new ClientHandler(socket1);
       clientHandler1.start();
       clientHandler1.out.writeUTF("SetPlayerNum");
+      clientHandler1.out.flush();
       clientHandler1.out.writeInt(1);
+      clientHandler1.out.flush();
 
       Socket socket2 = serverSocket.accept();
       clientHandler2 = new ClientHandler(socket2);
       clientHandler2.start();
       clientHandler2.out.writeUTF("SetPlayerNum");
+      clientHandler2.out.flush();
       clientHandler2.out.writeInt(2);
+      clientHandler2.out.flush();
 
       player1 = clientHandler1.getPlayer();
       player2 = clientHandler2.getPlayer();
@@ -53,6 +57,7 @@ public class Server {
 
     } catch (Exception e) {
       System.out.println("클라이언트 연결 중 오류 발생");
+      e.printStackTrace();
     }
   }
 
@@ -60,6 +65,8 @@ public class Server {
     while (true) {
       clientHandler1.out.writeUTF("StartTurnGame");
       clientHandler2.out.writeUTF("StartTurnGame");
+      clientHandler1.out.flush();
+      clientHandler2.out.flush();
 
       int select1 = clientHandler1.in.readInt();
       int select2 = clientHandler2.in.readInt();
@@ -85,6 +92,8 @@ public class Server {
   public void startMainGameStart() throws IOException, ClassNotFoundException {
     clientHandler1.out.writeUTF("StartMainGame");
     clientHandler2.out.writeUTF("StartMainGame");
+    clientHandler1.out.flush();
+    clientHandler2.out.flush();
 
     print.printfSystem("%s : %s", clientHandler1.getHostAddress(), clientHandler1.in.readUTF());
     print.printfSystem("%s : %s", clientHandler2.getHostAddress(), clientHandler2.in.readUTF());
@@ -93,24 +102,30 @@ public class Server {
       if (turnPlayer == 1) {
         clientHandler1.out.writeUTF("PlayerTurn");
         clientHandler2.out.writeUTF("WaitPlay");
+        clientHandler1.out.flush();
+        clientHandler2.out.flush();
         String msg = clientHandler1.in.readUTF();
         System.out.println(msg);
         if (msg.equals("done")) {
           System.out.println("hi");
           clientHandler2.out.writeUTF("done");
           clientHandler2.out.writeObject(clientHandler1.in.readObject());
+          clientHandler2.out.flush();
           turnPlayer = 2;
         }
 
       } else {
         clientHandler1.out.writeUTF("WaitPlay");
         clientHandler2.out.writeUTF("PlayerTurn");
+        clientHandler1.out.flush();
+        clientHandler2.out.flush();
         String msg = clientHandler2.in.readUTF();
         System.out.println(msg);
         if (msg.equals("done")) {
           System.out.println("hi");
           clientHandler1.out.writeUTF("done");
           clientHandler1.out.writeObject(clientHandler2.in.readObject());
+          clientHandler1.out.flush();
           turnPlayer = 1;
         }
       }

@@ -4,8 +4,6 @@ import com.bitcamp.stoneGame.main.GoBoardWithPhysics;
 import com.bitcamp.stoneGame.ui.BoardPanel;
 import com.bitcamp.stoneGame.vo.Player;
 import com.bitcamp.stoneGame.vo.Stone;
-import com.bitcamp.util.ObjectInputStreamStoneGame;
-import com.bitcamp.util.ObjectOutputStreamStoneGame;
 import com.bitcamp.util.Print;
 import com.bitcamp.util.PromptStoneGame;
 import java.io.IOException;
@@ -50,8 +48,8 @@ public class Client {
 
   private void execute() {
     try (Socket socket = new Socket(serverAddress, serverPort)) {
-      in = new ObjectInputStreamStoneGame(socket.getInputStream());
-      out = new ObjectOutputStreamStoneGame(socket.getOutputStream());
+      in = new ObjectInputStream(socket.getInputStream());
+      out = new ObjectOutputStream(socket.getOutputStream());
 
       while (true) {
         try {
@@ -66,6 +64,7 @@ public class Client {
               break;
             case "GetPlayer":
               out.writeObject(player);
+              out.flush();
               break;
             case "StartTurnGame":
               startTurnGame();
@@ -87,6 +86,7 @@ public class Client {
 
   private void startMainGame() throws IOException, InterruptedException, ClassNotFoundException {
     out.writeUTF("MainGame Connected");
+    out.flush();
     String command;
     goBoard = new GoBoardWithPhysics(player);
     boardPanel = goBoard.getBoardPanel();
@@ -112,19 +112,18 @@ public class Client {
     boardPanel.updatePlayer(player);
     System.out.println("턴 시작");
 
-    while (true) {
-      System.out.println("입력 대기 중");
-      if (boardPanel.isDone) {
-        boardPanel.isDone = false;
-        System.out.println("입력 완료");
-        out.writeUTF("done");
-        out.writeObject(boardPanel.getAction());
-        break;
+    synchronized (boardPanel) {
+      while (!boardPanel.isDone()) {
+        boardPanel.wait();  // 대기
       }
+      boardPanel.setDone(false);
     }
 
-    System.out.println("턴 종료");
+    out.writeUTF("done");
+    out.writeObject(boardPanel.getAction());
+    out.flush();
 
+    System.out.println("턴 종료");
   }
 
   private void waitTurn() throws InterruptedException, IOException, ClassNotFoundException {
@@ -132,11 +131,18 @@ public class Client {
     boardPanel.updatePlayer(player);
     System.out.println("대기 중");
 
-    String msg = in.readUTF();
-    if (msg.equals("done")) {
-      boardPanel.setStones((List<Stone>) in.readObject());
-      System.out.println(msg);
-      System.out.println("대기 완료");
+    try {
+      String msg = in.readUTF();
+      if (msg.equals("done")) {
+        List<Stone> receivedStones = (List<Stone>) in.readObject();
+        synchronized (boardPanel) {
+          boardPanel.setStones(receivedStones);
+        }
+        System.out.println("대기 완료");
+      }
+    } catch (IOException | ClassNotFoundException e) {
+      e.printStackTrace();
+      throw e;
     }
   }
 
@@ -151,5 +157,6 @@ public class Client {
 
     int select = prompt.inputIntWithRange(1, 3, "선택 >>");
     out.writeInt(select);
+    out.flush();
   }
 }

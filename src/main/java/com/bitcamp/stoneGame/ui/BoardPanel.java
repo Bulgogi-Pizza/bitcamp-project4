@@ -11,12 +11,16 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
-public class BoardPanel extends JPanel implements MouseListener, MouseMotionListener, ActionListener {
+public class BoardPanel extends JPanel implements MouseListener, MouseMotionListener, ActionListener,
+    Serializable {
+  private static final long serialVersionUID = 1L;
 
   public final int boardSize = 19;
   public final int cellSize = 42;
@@ -33,7 +37,6 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
   private Player player;
   private boolean isSaveAction;
   public boolean isDone;
-
   private Timer timer;
 
   public BoardPanel(Player player) {
@@ -47,9 +50,14 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     this.player = player;
   }
 
-  public List<Stone> getAction() {
+  public synchronized List<Stone> getAction() {
     isSaveAction = false;
     return stonesAction;
+  }
+
+  public synchronized void setStones(List<Stone> stones) {
+    this.stones = stones;
+    repaint();
   }
 
   private int getXFromColumn(char column) {
@@ -58,6 +66,15 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
   private int getYFromRow(int row) {
     return startY + (19 - row) * cellSize;
+  }
+
+  public synchronized void setDone(boolean done) {
+    this.isDone = done;
+    notifyAll();  // 알림
+  }
+
+  public synchronized boolean isDone() {
+    return this.isDone;
   }
 
   @Override
@@ -108,6 +125,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
     }
   }
 
+  // BoardPanel 클래스의 mouseReleased 메서드 수정
   @Override
   public void mouseReleased(MouseEvent e) {
     if (selectedStone != null) {
@@ -122,6 +140,10 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
         isSaveAction = true;
       }
       isDone = true;
+
+      synchronized (this) {
+        notifyAll();  // 알림
+      }
     }
   }
 
@@ -145,22 +167,22 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    for (Stone stone : stones) {
-      stone.move();
-      if (stone.getX() < startX || stone.getX() > startX + boardWidth || stone.getY() < startY || stone.getY() > startY + boardHeight) {
-        stone.setVisible(false);
-        stones.remove(stone);
+    synchronized (this) {
+      List<Stone> stonesToRemove = new ArrayList<>();
+      for (Stone stone : stones) {
+        stone.move();
+        if (stone.getX() < startX || stone.getX() > startX + boardWidth || stone.getY() < startY || stone.getY() > startY + boardHeight) {
+          stone.setVisible(false);
+          stonesToRemove.add(stone);
+        }
       }
+      stones.removeAll(stonesToRemove);
+      StonePhysics.detectCollisions(stones);
     }
-    StonePhysics.detectCollisions(stones);
     repaint();
   }
 
-  public void updatePlayer(Player player) {
+  public synchronized void updatePlayer(Player player) {
     this.player = player;
-  }
-
-  public void setStones(List<Stone> stones) {
-    this.stones = stones;
   }
 }

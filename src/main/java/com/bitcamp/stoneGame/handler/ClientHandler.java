@@ -2,17 +2,17 @@ package com.bitcamp.stoneGame.handler;
 
 import com.bitcamp.stoneGame.listener.ClientSocketListener;
 import com.bitcamp.stoneGame.vo.Player;
-import com.bitcamp.util.ObjectInputStreamStoneGame;
-import com.bitcamp.util.ObjectOutputStreamStoneGame;
 import com.bitcamp.util.Print;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
 public class ClientHandler extends Thread {
 
-  public ObjectInputStreamStoneGame in;
-  public ObjectOutputStreamStoneGame out;
+  public ObjectInputStream in;
+  public ObjectOutputStream out;
   Print print = new Print();
   InetAddress addr;
   private boolean turn;
@@ -21,8 +21,8 @@ public class ClientHandler extends Thread {
 
   public ClientHandler(Socket socket) throws IOException {
     this.clientSocket = socket;
-    this.out = new ObjectOutputStreamStoneGame(clientSocket.getOutputStream());
-    this.in = new ObjectInputStreamStoneGame(clientSocket.getInputStream());
+    this.out = new ObjectOutputStream(clientSocket.getOutputStream());
+    this.in = new ObjectInputStream(clientSocket.getInputStream());
     this.socketListener = new ClientSocketListener(clientSocket, in, out);
     this.addr = clientSocket.getLocalAddress();
 
@@ -32,6 +32,7 @@ public class ClientHandler extends Thread {
   public Player getPlayer() {
     try {
       out.writeUTF("GetPlayer");
+      out.flush();
       return (Player) in.readObject();
     } catch (Exception e) {
       System.out.println("플레이어 정보 수신 중 오류 발생!");
