@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.JOptionPane;
 
 public class Client {
 
@@ -51,6 +52,7 @@ public class Client {
       in = new ObjectInputStream(socket.getInputStream());
       out = new ObjectOutputStream(socket.getOutputStream());
 
+      EndGame:
       while (true) {
         try {
           String command = in.readUTF();
@@ -71,7 +73,7 @@ public class Client {
               break;
             case "StartMainGame":
               startMainGame();
-              break;
+              return;
           }
         } catch (Exception e) {
           System.out.println("오류 발생");
@@ -79,6 +81,7 @@ public class Client {
           break;
         }
       }
+      return;
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -92,6 +95,52 @@ public class Client {
     boardPanel = goBoard.getBoardPanel();
 
     while (true) {
+      if (boardPanel.isDefeatPlayer1() && boardPanel.isDefeatPlayer2()) {
+        print.printlnSystem("무승부입니다.");
+        print.printlnSystem("게임을 종료합니다.");
+        JOptionPane.showMessageDialog(goBoard, "무승부입니다.", "게임 종료", JOptionPane.INFORMATION_MESSAGE);
+
+        goBoard.dispose();
+        return;
+
+      } else if (boardPanel.isDefeatPlayer1()) {
+        if (player.getPlayerNum() == 1) {
+          print.printlnSystem("패배하였습니다.");
+          print.printlnSystem("게임을 종료합니다.");
+          JOptionPane.showMessageDialog(goBoard, "패배하였습니다.", "게임 종료",
+              JOptionPane.INFORMATION_MESSAGE);
+
+          goBoard.dispose();
+          return;
+        } else {
+          print.printlnSystem("승리하였습니다.");
+          print.printlnSystem("게임을 종료합니다.");
+          JOptionPane.showMessageDialog(goBoard, "승리하였습니다.", "게임 종료",
+              JOptionPane.INFORMATION_MESSAGE);
+
+          goBoard.dispose();
+          return;
+        }
+      } else if (boardPanel.isDefeatPlayer2()) {
+        if (player.getPlayerNum() == 2) {
+          print.printlnSystem("패배하였습니다.");
+          print.printlnSystem("게임을 종료합니다.");
+          JOptionPane.showMessageDialog(goBoard, "패배하였습니다.", "게임 종료",
+              JOptionPane.INFORMATION_MESSAGE);
+
+          goBoard.dispose();
+          return;
+        } else {
+          print.printlnSystem("승리하였습니다.");
+          print.printlnSystem("게임을 종료합니다.");
+          JOptionPane.showMessageDialog(goBoard, "승리하였습니다.", "게임 종료",
+              JOptionPane.INFORMATION_MESSAGE);
+
+          goBoard.dispose();
+          return;
+        }
+      }
+
       if (in.available() > 0) {
         command = in.readUTF();
 
@@ -105,6 +154,7 @@ public class Client {
         }
       }
     }
+
   }
 
   private void playTurn() throws InterruptedException, IOException {
@@ -121,9 +171,6 @@ public class Client {
 
     out.writeUTF("done");
     List<Stone> sendStones = boardPanel.getAction();
-    for(Stone st : sendStones){
-      System.out.println(st);
-    }
     out.writeObject(sendStones);
     out.flush();
 
@@ -133,20 +180,18 @@ public class Client {
   private void waitTurn() throws InterruptedException, IOException, ClassNotFoundException {
     player.setTurn(false);
     boardPanel.updatePlayer(player);
-    System.out.println("대기 중");
+    System.out.println("상대 플레이어 대기 중...");
 
     try {
       String msg = in.readUTF();
       if (msg.equals("done")) {
         @SuppressWarnings("unchecked")
         List<Stone> receivedStones = (List<Stone>) in.readObject();
-        for(Stone st : receivedStones){
-          System.out.println(st);
-        }
+
         synchronized (boardPanel) {
           boardPanel.setStones(receivedStones);
         }
-        System.out.println("대기 완료");
+        System.out.println("상대 플레이어 입력 완료");
       }
     } catch (IOException | ClassNotFoundException e) {
       e.printStackTrace();

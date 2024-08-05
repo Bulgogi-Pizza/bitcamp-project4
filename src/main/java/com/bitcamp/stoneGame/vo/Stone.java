@@ -5,7 +5,21 @@ import java.awt.Graphics;
 import java.io.Serializable;
 
 public class Stone implements Serializable {
+
   private static final long serialVersionUID = 1L;
+  int x, y;
+  Color color;
+  int radius = 20;
+  double vx = 0, vy = 0; // 속도
+  int playerNum;
+  boolean visible;
+  public Stone(int x, int y, Color color, int playerNum) {
+    this.x = x;
+    this.y = y;
+    this.color = color;
+    this.playerNum = playerNum;
+    this.visible = true;
+  }
 
   @Override
   public String toString() {
@@ -17,21 +31,6 @@ public class Stone implements Serializable {
         ", playerNum=" + playerNum +
         ", visible=" + visible +
         '}';
-  }
-
-  int x, y;
-  Color color;
-  int radius = 20;
-  double vx = 0, vy = 0; // 속도
-  int playerNum;
-  boolean visible;
-
-  public Stone(int x, int y, Color color, int playerNum) {
-    this.x = x;
-    this.y = y;
-    this.color = color;
-    this.playerNum = playerNum;
-    this.visible = true;
   }
 
   public boolean isVisible() {

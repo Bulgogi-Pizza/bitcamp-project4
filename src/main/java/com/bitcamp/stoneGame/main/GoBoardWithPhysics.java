@@ -11,7 +11,7 @@ public class GoBoardWithPhysics extends JFrame {
   public GoBoardWithPhysics(Player player) {
     this.boardPanel = new BoardPanel(player);
     setTitle("Go Board with Physics");
-    setSize(850, 880);
+    setSize(1050, 880);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     add(boardPanel);
     setVisible(true);
