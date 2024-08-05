@@ -13,7 +13,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Client {
+public class Client2 {
 
   String serverAddress;
   int serverPort;
@@ -28,14 +28,14 @@ public class Client {
   GoBoardWithPhysics goBoard;
   BoardPanel boardPanel;
 
-  public Client() {
+  public Client2() {
   }
 
   public static void main(String[] args) {
-    Client client = new Client();
+    Client2 client2 = new Client2();
 
-    client.initSetting();
-    client.execute();
+    client2.initSetting();
+    client2.execute();
   }
 
   private void initSetting() {

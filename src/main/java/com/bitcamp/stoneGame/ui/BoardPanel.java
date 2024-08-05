@@ -136,6 +136,7 @@ public class BoardPanel extends JPanel implements MouseListener, MouseMotionList
       selectedStone = null;
 
       if (!isSaveAction) {
+        stonesAction = new ArrayList<>();
         stonesAction.addAll(stones);
         isSaveAction = true;
       }

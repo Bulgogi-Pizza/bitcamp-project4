@@ -7,6 +7,18 @@ import java.io.Serializable;
 public class Stone implements Serializable {
   private static final long serialVersionUID = 1L;
 
+  @Override
+  public String toString() {
+    return "Stone{" +
+        "x=" + x +
+        ", y=" + y +
+        ", vx=" + vx +
+        ", vy=" + vy +
+        ", playerNum=" + playerNum +
+        ", visible=" + visible +
+        '}';
+  }
+
   int x, y;
   Color color;
   int radius = 20;
